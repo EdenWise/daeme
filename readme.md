@@ -1,4 +1,4 @@
-Basic, extremely-simple, scripts to cover the essentials of DAE (Digital Audio Extraction, i.e. "ripping").
+Basic, extremely-simple, scripts for Digital Audio Extraction (i.e. "ripping").
 
 (_These scripts are basic wrappers, primary thanks here goes to the RipIT developer(s).)
 
