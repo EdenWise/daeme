@@ -1,0 +1,101 @@
+#!/usr/bin/bash
+# Digital Audio Extraction and FAAC Encoder (a RipIT wrapper).
+
+# Lead
+echo "${0##*/} — Digital Audio Extraction and FAAC Encoder (a RipIT wrapper)."
+echo
+
+# Help
+help_prnt () {
+cat << EOF
+ ${0##*/} is a bare-essential Audio CD "ripper" and AAC encoder. For permanent
+ settings use the configuration file (~/.ripit/config or /etc/ripit/config).
+ Audio encoding quality definitions are listed below… Automatic display of the
+ help message can be dismissed with the -H option.
+
+   Preset    FAC  Bitrate 
+   --------  ---  --------
+   voice      55   ~64kbps
+   medium    100  ~128kbps
+   standard  150  ~175kbps
+   extreme   320  ~240kbps
+   insane    500  ~270kbps
+
+EOF
+}
+if [ "$1" = -H ]; then
+  [ ! -f ~/.config/${0##*/}-help ] && touch ~/.config/${0##*/}-help
+else
+  [ -n "$1" ] && help_prnt
+  [ -z "$1" ] && [ ! -f ~/.config/${0##*/}-help ] && help_prnt
+fi
+
+# Output directory option
+ud=~/.config/user-dirs.dirs; [ -f $ud ] && source $ud; musicdir=$XDG_MUSIC_DIR
+while true; do
+  read -p "- Audio output directory? [$XDG_MUSIC_DIR]:  " outputdir
+  [ -z "$outputdir" ] && outputdir="$XDG_MUSIC_DIR"                             
+  if [ ! -d "$outputdir" ]; then
+    echo "* Nonexistent directory."
+  else
+    break
+  fi
+done
+
+# Encoding quality option
+while true; do
+  read -p \
+    "- Audio encoding quality? (voice, medium, standard, extreme, insane):  "  \
+    audio_quality
+  [ "$audio_quality" = voice    -o "$audio_quality" = v ] \
+    && audio_quality=55  && break
+  [ "$audio_quality" = medium   -o "$audio_quality" = m ] \
+    && audio_quality=100 && break
+  [ "$audio_quality" = standard -o "$audio_quality" = s ] \
+    && audio_quality=150 && break
+  [ "$audio_quality" = extreme  -o "$audio_quality" = e ] \
+    && audio_quality=320 && break
+  [ "$audio_quality" = insane   -o "$audio_quality" = i ] \
+    && audio_quality=500 && break
+  echo "* Nonexistent quality."
+done
+
+# Cover art option
+while true; do
+  read -p "- Coverart embed? [/tmp/cover.jpg] (y/n):  " yn
+  case $yn in
+    [Yy] ) if [ ! -f "/tmp/cover.jpg" ]; then
+             echo "* Nonexistent image."
+           else
+           coverart=1; break; fi ;;
+    [Nn] ) coverart=0; break ;;
+    *    ) echo "* Select (y)es or (n)o."
+  esac
+done
+
+# Audiobook option
+while true; do
+  read -p "- Audiobook CD? (y/n):  " yn
+  case $yn in
+    [Yy] ) book=1; break ;;
+    [Nn] ) book=0; break ;;
+    *    ) echo "Select (y)es or (n)o."
+  esac
+done
+
+# Loop option
+while true; do
+  read -p "- Multiple CDs? (y/n):  " yn
+  case $yn in
+    [Yy] ) loop=1; break ;;
+    [Nn] ) loop=0; break ;;
+    *    ) echo "* Select (y)es or (n)o."
+  esac
+done
+
+ripit --outputdir="$outputdir" \
+      --coder 3 --quality "$audio_quality" --faacopt "-s" \
+      --coverart=$coverart --coverpath '/tmp/cover.jpg' \
+      --book=$book             \
+      --loop=$loop             \
+      1-a
