@@ -33,7 +33,7 @@ fi
 # Output directory option
 ud=~/.config/user-dirs.dirs; [ -f $ud ] && source $ud; musicdir=$XDG_MUSIC_DIR
 while true; do
-  read -p "- Audio output directory? [$XDG_MUSIC_DIR]:  " outputdir
+  read -p "- Output directory? [$XDG_MUSIC_DIR]:  " outputdir
   [ -z "$outputdir" ] && outputdir="$XDG_MUSIC_DIR"                             
   if [ ! -d "$outputdir" ]; then
     echo "* Nonexistent directory."
@@ -45,7 +45,7 @@ done
 # Encoding quality option
 while true; do
   read -p \
-    "- Audio encoding quality? (voice, medium, standard, extreme, insane):  "  \
+    "- Encoding quality? (voice, medium, standard, extreme, insane):  "  \
     audio_quality
   [ "$audio_quality" = voice    -o "$audio_quality" = v ] \
     && audio_quality=55  && break
