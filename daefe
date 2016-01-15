@@ -1,17 +1,16 @@
 #!/usr/bin/bash
-# Digital Audio Extraction and FAAC Encoder (a RipIT wrapper).
+# Digital Audio Extraction & FAAC Encoder (a RipIT wrapper)
 
 # Lead
-echo "${0##*/} — Digital Audio Extraction and FAAC Encoder (a RipIT wrapper)."
-echo
+echo -e "${0##*/} — Digital Audio Extraction & FAAC Encoder (a RipIT wrapper)\n"
 
 # Help
 help_prnt () {
 cat << EOF
- ${0##*/} is a bare-essential Audio CD "ripper" and AAC encoder. For permanent
- settings use the configuration file (~/.ripit/config or /etc/ripit/config).
- Audio encoding quality definitions are listed below… Automatic display of the
- help message can be dismissed with the -H option.
+ ${0##*/} is a bare-essential Audio CD ripper and AAC encoder. Permanent 
+ settings define in the config file "~/.ripit/config" or "/etc/ripit/config".
+ Audio encoding quality definitions are listed below. This help message can be
+ permanently removed on usage with the -H option.
 
    Preset    FAC  Bitrate 
    --------  ---  --------
@@ -23,27 +22,27 @@ cat << EOF
 
 EOF
 }
-if [ "$1" = -H ]; then
-  [ ! -f ~/.config/${0##*/}-help ] && touch ~/.config/${0##*/}-help
+if [ "$1" = -H ] ; then
+   [ ! -f ~/.config/${0##*/}-help ] && touch ~/.config/${0##*/}-help
 else
-  [ -n "$1" ] && help_prnt
-  [ -z "$1" ] && [ ! -f ~/.config/${0##*/}-help ] && help_prnt
+   [ -n "$1" ] && help_prnt
+   [ -z "$1" ] && [ ! -f ~/.config/${0##*/}-help ] && help_prnt
 fi
 
-# Output directory option
-ud=~/.config/user-dirs.dirs; [ -f $ud ] && source $ud; musicdir=$XDG_MUSIC_DIR
-while true; do
+# Output directory
+ud=~/.config/user-dirs.dirs ; [ -f $ud ] && source $ud ; musicdir=$XDG_MUSIC_DIR
+while true ; do
   read -p "- Output directory? [$XDG_MUSIC_DIR]:  " outputdir
-  [ -z "$outputdir" ] && outputdir="$XDG_MUSIC_DIR"                             
-  if [ ! -d "$outputdir" ]; then
-    echo "* Nonexistent directory."
+  [ -z "$outputdir" ] && outputdir="$musicdir"                             
+  if [ ! -d "$outputdir" ] ; then
+     echo "* Nonexistent directory."
   else
-    break
+     break
   fi
 done
 
-# Encoding quality option
-while true; do
+# Encoding quality
+while true ; do
   read -p \
     "- Encoding quality? (voice, medium, standard, extreme, insane):  "  \
     audio_quality
@@ -60,42 +59,49 @@ while true; do
   echo "* Nonexistent quality."
 done
 
-# Cover art option
-while true; do
+# Cover art
+while true ; do
   read -p "- Coverart embed? [/tmp/cover.jpg] (y/n):  " yn
   case $yn in
     [Yy] ) if [ ! -f "/tmp/cover.jpg" ]; then
-             echo "* Nonexistent image."
+              echo "* Nonexistent image."
            else
-           coverart=1; break; fi ;;
-    [Nn] ) coverart=0; break ;;
+           #coverart=1; break; fi ;;
+           coverart="--coverart=1 --coverpath '/tmp/cover.jpg'"
+              break
+           fi ;;
+    [Nn] ) coverart="--coverart=0"
+           break ;;
     *    ) echo "* Select (y)es or (n)o."
   esac
 done
 
-# Audiobook option
-while true; do
+# Audiobook
+while true ; do
   read -p "- Audiobook CD? (y/n):  " yn
   case $yn in
-    [Yy] ) book=1; break ;;
-    [Nn] ) book=0; break ;;
+    [Yy] ) book=1
+           break ;;
+    [Nn] ) book=0
+           break ;;
     *    ) echo "Select (y)es or (n)o."
   esac
 done
 
-# Loop option
+# Loop
 while true; do
   read -p "- Multiple CDs? (y/n):  " yn
   case $yn in
-    [Yy] ) loop=1; break ;;
-    [Nn] ) loop=0; break ;;
+    [Yy] ) loop=1
+           break ;;
+    [Nn] ) loop=0
+           break ;;
     *    ) echo "* Select (y)es or (n)o."
   esac
 done
 
 ripit --outputdir="$outputdir" \
       --coder 3 --quality "$audio_quality" --faacopt "-s" \
-      --coverart=$coverart --coverpath '/tmp/cover.jpg' \
-      --book=$book             \
-      --loop=$loop             \
-      1-a
+      "$coverart"  \
+      --book=$book \
+      --loop=$loop
